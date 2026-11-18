@@ -1,18 +1,12 @@
-﻿# TextRPG
+# TextRPG
 
-Python 콘솔 기반 전투·탐험 RPG의 첫 실행 버전입니다. 전투와 탐험 상태는 애플리케이션 계층에서 관리하고 MySQL 저장소가 세이브 슬롯 3개를 보관합니다.
+Windows 콘솔에서 실행하는 전투·탐험 RPG입니다. 세이브는 SQLite 파일로 각 Windows 사용자 계정의 PC에 저장되며, MySQL 서버나 네트워크 연결이 필요하지 않습니다.
 
 ## 요구 환경
 
 - Windows 10/11
-- Python 3.11 이상 (개발·빌드 시)
-- MySQL Server 8.0 이상과 접속 가능한 계정
-
-MySQL Connector/Python을 사용하므로 DB 서버는 게임 실행 파일에 포함되지 않습니다. 플레이하는 PC에서 MySQL 서버에 연결할 수 있어야 합니다.
-
-## DB 준비
-
-MySQL에 접속해 `sql/schema.sql`의 `change-me`를 사용할 비밀번호로 바꾼 뒤 실행하세요. 같은 비밀번호를 `.env.example`에서 `.env`를 만들 때 `MYSQL_PASSWORD`에 설정합니다. SQL 스크립트는 데이터베이스와 전용 계정, 세이브 테이블을 준비합니다. `.env`는 비밀번호가 들어갈 수 있어 Git에 올리지 않습니다.
+- 개발 및 EXE 빌드: Python 3.11 이상
+- 실행: 빌드된 `TextRPG.exe`만 있으면 됩니다.
 
 ## 개발 실행
 
@@ -23,23 +17,25 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
+PowerShell 실행 정책 때문에 가상환경 활성화가 막히면 활성화 명령 대신 아래처럼 가상환경 Python을 직접 실행할 수 있습니다.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe main.py
+```
+
+첫 실행 때 저장 파일과 테이블을 자동으로 준비합니다. Windows 세이브 파일 위치는 `%LOCALAPPDATA%\TextRPG\saves.sqlite3`입니다. 같은 Windows 사용자 계정으로 실행하는 게임은 세이브 슬롯 1~3을 함께 사용합니다.
+
 ## Windows EXE 빌드
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python -m PyInstaller --clean --noconfirm --onefile --console --name TextRPG main.py
+.\.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm --onefile --console --name TextRPG main.py
 ```
 
-산출물은 `dist\TextRPG.exe`입니다. `.env.example`을 `.env`로 복사해 EXE 옆에 배치하세요. 콘솔에서 실행하는 게임이므로 `--console` 옵션을 씁니다. PyInstaller 빌드는 대상 운영체제에서 실행해야 하므로 Windows용 EXE는 Windows에서 빌드합니다.
+산출물은 `dist\TextRPG.exe`입니다. 배포할 때는 이 EXE를 전달하면 됩니다. 별도의 `.env`, SQL 스크립트, MySQL 설치가 필요하지 않습니다. Windows용 EXE는 Windows에서 빌드해야 합니다.
 
-## Git 배포 흐름
+새 컴퓨터로 세이브를 옮기려면 게임을 종료한 뒤 기존 PC의 `%LOCALAPPDATA%\TextRPG\saves.sqlite3` 파일을 새 PC의 같은 위치로 복사하세요. 기존 세이브 파일을 덮어쓸 수 있으니 백업 후 옮기세요.
 
-```powershell
-git init
-git add .
-git commit -m "Build playable TextRPG MVP"
-git tag v0.1.0
-```
+## GitHub 배포
 
-빌드 결과물과 비밀정보는 Git에 포함하지 않습니다. `dist\TextRPG.exe`와 별도의 `.env`를 배포하세요. 배포 환경마다 MySQL 호스트·계정·DB를 설정해야 합니다.
-
+Windows에서 EXE를 빌드한 뒤 `dist\TextRPG.exe`를 ZIP으로 묶어 GitHub 저장소의 **Releases**에 첨부하세요. `dist`, `.venv`, 개인 세이브 파일은 Git 저장소에 커밋하지 않습니다.
